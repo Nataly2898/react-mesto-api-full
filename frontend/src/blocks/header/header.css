@@ -1,0 +1,23 @@
+.header {
+  border-bottom: 1px solid rgba(84, 84, 84, 0.7);
+  display: grid;
+  grid-template-columns: min-content 1fr;
+  justify-items: end;
+  align-items: center;
+  padding: 41px 0 41px;
+  max-width: 880px;
+  margin: 0 auto;
+}
+
+@media (max-width: 980px) {
+  .header {
+    max-width: 80%;
+  }
+}
+
+@media (max-width: 767px) {
+  .header {
+    max-width: 100%;
+    padding: 37px 27px;
+  }
+}

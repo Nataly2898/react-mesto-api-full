@@ -1,0 +1,27 @@
+.login__submit {
+  cursor: pointer;
+  margin-top: 216px;
+  padding: 14px;
+  border: none;
+  border-radius: 2px;
+  background-color: #fff;
+  transition: opacity .3s;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 22px;
+  text-align: center;
+  color: #000000;
+}
+
+.login__submit:hover {
+  opacity: .85;
+}
+
+@media (max-width: 768px) {
+  .login__submit {
+    margin-top: 173px;
+    font-size: 16px;
+    line-height: 19px;
+  }
+}

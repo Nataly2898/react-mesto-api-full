@@ -1,0 +1,10 @@
+.form__field {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+  
+.form__field:not(:first-child) {
+    margin: 29px 0 0;
+}
+  
