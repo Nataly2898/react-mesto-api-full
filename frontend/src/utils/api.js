@@ -41,6 +41,13 @@ class Api {
     }).then((res) => this._handleError(res));
   }
 
+  changeLikeCardStatus(cardId, isLiked) {
+    if (isLiked) {
+        return this.setLike(cardId);
+    } else {
+        return this.deleteLike(cardId);
+    }
+  }
   // Лайк карточки
   setLike(cardId) {
     return fetch(`${this._url}/cards/${cardId}/likes`, {
@@ -110,6 +117,7 @@ const api = new Api({
   url: BASE_URL,
   headers: {
     "Content-Type": "application/json",
+    Authorization: `Bearer ${localStorage.getItem('jwt')}`,
   }
 });
 

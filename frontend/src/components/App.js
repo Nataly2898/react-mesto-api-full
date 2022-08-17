@@ -35,7 +35,7 @@ function App() {
 
     //Получение информации о пользователе
     useEffect(() => {
-         const token = localStorage.getItem('jwt');
+        const token = localStorage.getItem('jwt');
         if (!loggedIn) return
         api.getUserInfo()
             .then(setCurrentUser)
@@ -66,26 +66,18 @@ function App() {
 
     // Поддержка лайков и дизлайков
     function handleCardLike(card) {
-        // Проверяем, есть ли уже лайк на этой карточке
-        const isLiked = card.likes.some(i => i._id === currentUser._id);
-        if (!isLiked) {
-            api.setLike(card._id)
-                .then((newCard) => {
-                    setCards((state) => state.map((c) => c._id === card._id ? newCard : c));
-                })
-                .catch((err) => {
-                    console.log(err);
-                });
-        }
-        else {
-            api.deleteLike(card._id)
-                .then((newCard) => {
-                    setCards((state) => state.map((c) => c._id === card._id ? newCard : c));
-                })
-                .catch((err) => {
-                    console.log(err);
-                });
-        }
+        // Снова проверяем, есть ли уже лайк на этой карточке
+        const isLiked = card.likes.some(i => i === currentUser._id);
+
+        // Отправляем запрос в API и получаем обновлённые данные карточки
+        api.changeLikeCardStatus(card._id, !isLiked)
+            .then((newCard) => {
+                // Формируем новый массив на основе имеющегося, подставляя в него новую карточку
+                setCards((state) => state.map((c) => c._id === card._id ? newCard : c));
+            })
+            .catch((err) => {
+                console.log(err);
+            })
     }
 
     // Поддержка удаления карточки
@@ -196,7 +188,7 @@ function App() {
             }
             auth.checkToken(jwt)
                 .then((response) => {
-                    setUserEmail(response.data.email);
+                    setUserEmail(response.data?.email);
                     setLoggedIn(true);
                     history.push('/');
                 })

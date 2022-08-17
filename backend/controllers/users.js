@@ -5,7 +5,9 @@ const ExistingEmailError = require('../errors/ExistingEmailError');
 const IncorrectRequestError = require('../errors/IncorrectRequestError');
 const NotFoundError = require('../errors/NotFoundError');
 const NotAuthorizationError = require('../errors/NotAuthorizationError');
-const config = require('../middlewares/config');
+//const config = require('../middlewares/config');
+
+const { NODE_ENV, JWT_SECRET } = process.env;
 
 // Создание нового пользователя
 module.exports.createUser = (req, res, next) => {
@@ -52,7 +54,7 @@ module.exports.login = (req, res, next) => {
       // создадим токен
       const token = jwt.sign(
         { _id: user._id },
-        config.JWT_SECRET,
+        NODE_ENV === 'production' ? JWT_SECRET : 'some-secret-key',
         {
           expiresIn: '7d',
         },
