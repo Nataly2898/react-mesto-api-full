@@ -1,6 +1,3 @@
-
-const BASE_URL = "https://api.mesto2022.nomoredomains.sbs";
-
 class Api {
   constructor(config) {
     this._url = config.url;
@@ -12,6 +9,10 @@ class Api {
       return res.json();
     }
     return Promise.reject(`Ошибка: ${res.status}`);
+  }
+
+  setToken(token) {
+    this._headers.Authorization = `Bearer ${token}`
   }
 
   // Получение карточек с сервера
@@ -102,23 +103,13 @@ class Api {
   }
 }
 
-/*
-// Инициализация класса Api
-const api = new Api({
-  url: "https://mesto.nomoreparties.co/v1/cohort-41",
-  headers: {
-    authorization: "a3398c1a-3ea4-4c41-8ac3-48ad581650e6",
-    "Content-Type": "application/json",
-  },
-});
-*/
-
-const api = new Api({
-  url: BASE_URL,
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${localStorage.getItem('jwt')}`,
-  }
-});
+const BASE_URL = "https://api.mesto2022.nomoredomains.sbs";
+    const api = new Api({
+        url: BASE_URL,
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+        }
+    });
 
 export default api;

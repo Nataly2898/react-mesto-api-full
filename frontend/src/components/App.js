@@ -17,7 +17,6 @@ import CurrentUserContext from "../contexts/CurrentUserContext";
 import api from "../utils/api";
 
 function App() {
-
     const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
     const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
     const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
@@ -35,7 +34,6 @@ function App() {
 
     //Получение информации о пользователе
     useEffect(() => {
-        const token = localStorage.getItem('jwt');
         if (!loggedIn) return
         api.getUserInfo()
             .then(setCurrentUser)
@@ -47,7 +45,7 @@ function App() {
         if (!loggedIn) return
         api.getInitialCards()
             .then(res => {
-                setCards(res);
+                setCards(res?.reverse());
             })
             .catch(err => console.error(err));
     }, [loggedIn]);
@@ -144,6 +142,7 @@ function App() {
     function handleRegister(email, password) {
         auth.register(email, password)
             .then(() => {
+                setUserEmail(email)
                 setIsSuccessfulReg(true);
                 setInfoTooltipPopupOpen(true);
                 history.push('/signin');
@@ -160,6 +159,7 @@ function App() {
             .then((response) => {
                 if (response) {
                     localStorage.setItem('jwt', response.token);
+                    api.setToken(response.token)
                     setUserEmail(email);
                     setLoggedIn(true);
                     history.push('/');
@@ -188,7 +188,7 @@ function App() {
             }
             auth.checkToken(jwt)
                 .then((response) => {
-                    setUserEmail(response.data?.email);
+                    setUserEmail(response.email);
                     setLoggedIn(true);
                     history.push('/');
                 })

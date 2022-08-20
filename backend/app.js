@@ -5,6 +5,7 @@ const router = express.Router();
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const { errors } = require('celebrate');
+// const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const auth = require('./middlewares/auth');
@@ -36,9 +37,6 @@ app.use(
   }),
 );
 
-// Подключаем логгер запросов
-app.use(requestLogger);
-
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
@@ -46,27 +44,31 @@ const limiter = rateLimit({
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
 
+// Подключаем логгер запросов
+app.use(requestLogger);
+
 app.use(limiter);
 app.use(cors);
 app.use(helmet());
-
-// Краш-тест сервера
-app.get('/crash-test', () => {
-  setTimeout(() => {
-    throw new Error('Сервер сейчас упадёт');
-  }, 0);
-});
+// app.use(cors());
 
 app.post('/signin', celebrates.signIn, login);
 app.post('/signup', celebrates.signUp, createUser);
 
 app.use(auth);
 
+// Краш-тест сервера
+app.get('/crash-test', auth, () => {
+  setTimeout(() => {
+    throw new Error('Сервер сейчас упадёт');
+  }, 0);
+});
+
 // Роуты, которым нужна авторизация
 app.use('/users', auth, require('./routes/users'));
 app.use('/cards', auth, require('./routes/cards'));
 
-app.use('*', (req, res, next) => {
+app.use('*', auth, (req, res, next) => {
   next(new NotFoundError('Страница не найдена'));
 });
 

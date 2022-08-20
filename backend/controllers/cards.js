@@ -12,15 +12,15 @@ module.exports.getCards = (req, res, next) => {
 // Создание новой карточки
 module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
+
   Card.create({ name, link, owner: req.user._id })
-    .then((card) => res.status(200).send(card))
+    .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new IncorrectRequestError('Переданы неверные данные.');
+        return next(new IncorrectRequestError('Переданы неверные данные.'));
       }
       return next(err);
-    })
-    .catch(next);
+    });
 };
 // Удаление карточки
 module.exports.deleteCard = (req, res, next) => {
@@ -30,16 +30,15 @@ module.exports.deleteCard = (req, res, next) => {
     // eslint-disable-next-line consistent-return
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('Карточка не найдена.');
+        return next(new NotFoundError('Карточка не найдена.'));
       }
       if (card.owner.valueOf() !== _id) {
-        throw new ForbiddenError('Нельзя удалить чужую карточку!');
+        return next(new ForbiddenError('Нельзя удалить чужую карточку!'));
       }
       Card.findByIdAndRemove(cardId)
         .then((deletedCard) => res.send(deletedCard))
         .catch(next);
-    })
-    .catch(next);
+    });
 };
 // Поставить лайк
 module.exports.likeCard = (req, res, next) => {
@@ -50,16 +49,16 @@ module.exports.likeCard = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('Карточка не найдена.');
-      } else res.send(card);
+        return next(new NotFoundError('Карточка не найдена.'));
+      }
+      return res.send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new IncorrectRequestError('Некорректые данные карточки');
+        return next(new IncorrectRequestError('Некорректые данные карточки'));
       }
-      next(err);
-    })
-    .catch(next);
+      return next(err);
+    });
 };
 // Удалить лайк
 module.exports.dislikeCard = (req, res, next) => {
@@ -70,14 +69,13 @@ module.exports.dislikeCard = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('Карточка не найдена. Лайк не удалось убрать.');
+        next(new NotFoundError('Карточка не найдена. Лайк не удалось убрать.'));
       } else res.send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new IncorrectRequestError('Некорректые данные карточки');
+        return next(new IncorrectRequestError('Некорректые данные карточки'));
       }
-      next(err);
-    })
-    .catch(next);
+      return next(err);
+    });
 };

@@ -5,7 +5,6 @@ const ExistingEmailError = require('../errors/ExistingEmailError');
 const IncorrectRequestError = require('../errors/IncorrectRequestError');
 const NotFoundError = require('../errors/NotFoundError');
 const NotAuthorizationError = require('../errors/NotAuthorizationError');
-//const config = require('../middlewares/config');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
@@ -15,13 +14,7 @@ module.exports.createUser = (req, res, next) => {
     email, password, about, avatar, name,
   } = req.body;
 
-  User.findOne({ email })
-    .then(() => {
-      if (!email || !password) {
-        throw new IncorrectRequestError('Неправильный логин или пароль.');
-      }
-      return bcrypt.hash(password, 10);
-    })
+  bcrypt.hash(password, 10)
     .then((hash) => User.create({
       email,
       password: hash,
@@ -38,12 +31,11 @@ module.exports.createUser = (req, res, next) => {
     }))
     .catch((err) => {
       if (err.name === 'MongoServerError' && err.code === 11000) {
-        throw new ExistingEmailError('Пользователь с таким email уже существует');
+        next(new ExistingEmailError('Пользователь с таким email уже существует'));
       } else if (err.name === 'ValidationError') {
-        throw new IncorrectRequestError('Ошибка валидации данных');
+        next(new IncorrectRequestError('Ошибка валидации данных'));
       } else next(err);
-    })
-    .catch(next);
+    });
 };
 
 // Аутентификация пользователя
@@ -63,10 +55,7 @@ module.exports.login = (req, res, next) => {
       // вернём токен
       res.send({ token });
     })
-    .catch(() => {
-      throw new NotAuthorizationError('Неверный email или пароль.');
-    })
-    .catch(next);
+    .catch(() => next(new NotAuthorizationError('Неверный email или пароль.')));
 };
 
 // возвращает информацию о текущем пользователе
@@ -80,7 +69,7 @@ module.exports.getCurrentUser = (req, res, next) => {
 
     // возвращаем пользователя, если он есть
     return res.send(user);
-  }).catch(next);
+  });
 };
 
 // Получение пользователей
@@ -95,16 +84,15 @@ module.exports.getUserById = (req, res, next) => {
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('Пользователь не найден');
+        next(new NotFoundError('Пользователь не найден'));
       } else res.send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new IncorrectRequestError('Некорректный айди');
+        next(IncorrectRequestError('Некорректный айди'));
       }
-      next(err);
-    })
-    .catch(next);
+      return next(err);
+    });
 };
 
 // Обновление информации о пользователе
@@ -118,11 +106,10 @@ module.exports.updateProfile = (req, res, next) => {
     .then((user) => res.send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new IncorrectRequestError('Неверный тип данных.');
+        return next(new IncorrectRequestError('Неверный тип данных.'));
       }
-      next(err);
-    })
-    .catch(next);
+      return next(err);
+    });
 };
 
 // Обновление аватара пользователя
@@ -136,9 +123,8 @@ module.exports.updateAvatar = (req, res, next) => {
     .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new IncorrectRequestError('Неверная ссылка');
+        return next(new IncorrectRequestError('Неверная ссылка'));
       }
-      next(err);
-    })
-    .catch(next);
+      return next(err);
+    });
 };
